@@ -340,7 +340,7 @@ if ($search_all) {
 }
 
 if (!empty($conf->categorie->enabled)) {
-	//$sql .= Categorie::getFilterSelectQuery('timesheet', "t.rowid", $search_category_array);
+	$sql .= Categorie::getFilterSelectQuery('timesheet', "t.rowid", $search_category_array);
 }
 
 //$sql.= dolSqlDateFilter("t.field", $search_xxxday, $search_xxxmonth, $search_xxxyear);
