@@ -476,7 +476,7 @@ class ActionsDolisirh
 		global $conf, $user, $langs;
 		$langs->load('projects');
 		if (in_array('ticketcard', explode(':', $parameters['context']))) {
-			if (GETPOST('action') == 'presend_addmessage') {
+			if (GETPOST('action') == 'presend_addmessage' || GETPOST('action') == 'add_message') {
 				$ticket = new Ticket($this->db);
 				$result = $ticket->fetch('', GETPOST('ref', 'alpha'), GETPOST('track_id', 'alpha'));
 				dol_syslog(var_export($ticket, true), LOG_DEBUG);
