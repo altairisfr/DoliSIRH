@@ -503,7 +503,7 @@ class ActionsDolisirh
 				}
 				dol_htmloutput_events();
 			} elseif ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'view')) {
-				require_once __DIR__ . '/../../../projet/class/task.class.php';
+				require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 
 				$task   = new Task($this->db);
 				$ticket = new Ticket($this->db);
