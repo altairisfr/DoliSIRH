@@ -32,6 +32,9 @@ if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1))."/main.inc.php")) $
 if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php")) $res = @include dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php";
 // Try main.inc.php using relative path
 if (!$res && file_exists("../../main.inc.php")) $res = @include "../../main.inc.php";
+if (empty($res) && file_exists($_SERVER['DOCUMENT_ROOT']."/main.inc.php")) {
+	$res=@include($_SERVER['DOCUMENT_ROOT']."/main.inc.php"); // Use on dev env only
+}
 if (!$res && file_exists("../../../main.inc.php")) $res = @include "../../../main.inc.php";
 if (!$res) die("Include of main fails");
 

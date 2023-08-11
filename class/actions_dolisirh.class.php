@@ -476,7 +476,7 @@ class ActionsDolisirh
 		global $conf, $user, $langs;
 		$langs->load('projects');
 		if (in_array('ticketcard', explode(':', $parameters['context']))) {
-			if (GETPOST('action') == 'presend_addmessage') {
+			if (GETPOST('action') == 'presend_addmessage' || GETPOST('action') == 'add_message') {
 				$ticket = new Ticket($this->db);
 				$result = $ticket->fetch('', GETPOST('ref', 'alpha'), GETPOST('track_id', 'alpha'));
 				dol_syslog(var_export($ticket, true), LOG_DEBUG);
@@ -503,7 +503,7 @@ class ActionsDolisirh
 				}
 				dol_htmloutput_events();
 			} elseif ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'view')) {
-				require_once __DIR__ . '/../../../projet/class/task.class.php';
+				require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 
 				$task   = new Task($this->db);
 				$ticket = new Ticket($this->db);
