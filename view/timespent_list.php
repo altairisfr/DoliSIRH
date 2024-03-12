@@ -435,7 +435,7 @@ if (!empty($conf->categorie->enabled) && $user->rights->categorie->lire) {
 $moreforfilter .= 'Client seulement : <input type="checkbox" name="custonly"' . (GETPOST('custonly') ? ' checked=checked' : ''). '>';
 
 if (!empty($moreforfilter)) {
-	print '<div class="divsearchfieldfilter">';
+	print '<div class="liste_titre liste_titre_bydiv centpercent">';
 	print $moreforfilter;
 	print '</div>';
 }
@@ -659,8 +659,8 @@ while ($i < $totalarray['nbfield']) {
         } else {
             print '<td class="left">'.$langs->trans("Totalforthispage").'</td>';
         }
-    } elseif ($totalarray['totaltask_duration'] == $i) {
-        print '<td class="left">'.convertSecondToTime($totalarray['val']['task_duration'], 'allhourmin').'</td>';
+    } elseif ($totalarray['totalelement_duration'] == $i) {
+        print '<td class="left">'.convertSecondToTime($totalarray['val']['element_duration'], 'allhourmin').'</td>';
     } elseif ($totalarray['totalthm'] == $i) {
         print '<td class="right">'.price($totalarray['val']['thm']).'</td>';
     } else {
