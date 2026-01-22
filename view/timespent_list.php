@@ -119,14 +119,19 @@ $arrayfields = array(
 	'p.rowid'        => array('fieldalias' => 'projectid', 'type'=> 'text', 'label' => "ProjectId", 'visible' => 0),
 	'pt.rowid'       => array('fieldalias' => 'taskid', 'type' => 'Task:projet/class/task.class.php:1', 'label' => "Task", 'checked' => 1, 'position' => 30, 'visible' => 1),
 	'label'          => array('tablealias' => 'pt.', 'type' => 'text', 'label' => "Label", 'checked' => 1, 'position' => 40, 'visible' => 1),
-	'task_date'      => array('tablealias' => 'ptt.', 'type' => 'datetime', 'label' => "Date", 'checked' => 1, 'position' => 50,  'visible' => 1),
-	'fk_user'        => array('tablealias' => 'ptt.', 'fieldalias' => 'fk_user', 'type' => 'User:user/class/user.class.php', 'label' => "User", 'checked' => 1, 'position' => 60, 'visible' => 1),
-	'task_duration'  => array('tablealias' => 'ptt.', 'type' => 'duration', 'label' => "Duration",  'checked' => 1, 'position' => 70, 'visible' => 1, 'isameasure'=>1),
+	'fk_user'        => array('tablealias' => 'ptt.', 'fieldalias' => 'fk_user', 'type' => 'User:user/class/user.class.php:1:(t.employee:=:1) AND (t.fk_soc:IS:NULL) AND (statut:=:1)', 'label' => "User", 'checked' => 1, 'position' => 60, 'visible' => 1),
 	'note'           => array('tablealias' => 'ptt.', 'type' => 'text', 'label' => "Note",  'checked' => 1, 'position' => 80, 'visible' => 1),
 	'thm'            => array('tablealias' => 'ptt.', 'type' => 'price', 'label' => "Value",  'checked' => 1, 'position' => 90, 'visible' => 1, 'isameasure'=>1),
 	'invoice_id'     => array('tablealias' => 'ptt.', 'fieldalias' => 'invoice_id', 'type' => 'Facture:compta/facture/class/facture.class.php:1', 'label' => "Facture", 'checked' => 1, 'position' => 100, 'visible' => 1),
 	'ts.rowid'       => array('fieldalias' => 'timesheetid', 'type' => 'TimeSheet:custom/dolisirh/class/timesheet.class.php:1', 'label' => "TimeSheet", 'checked' => 1, 'position' => 110, 'visible' => 1),
 );
+if ($versionEighteenOrMore) {
+	$arrayfields['element_date'] = array('tablealias' => 'ptt.', 'type' => 'datetime', 'label' => "Date", 'checked' => 1, 'position' => 50,  'visible' => 1);
+	$arrayfields['element_duration'] = array('tablealias' => 'ptt.', 'type' => 'duration', 'label' => "Duration",  'checked' => 1, 'position' => 70, 'visible' => 1, 'isameasure'=>1);
+} else {
+	$arrayfields['task_date'] = array('tablealias' => 'ptt.', 'type' => 'datetime', 'label' => "Date", 'checked' => 1, 'position' => 50,  'visible' => 1);
+	$arrayfields['task_duration'] = array('tablealias' => 'ptt.', 'type' => 'duration', 'label' => "Duration",  'checked' => 1, 'position' => 70, 'visible' => 1, 'isameasure'=>1);
+}
 
 // Default sort order (if not yet defined by previous GETPOST)
 if (!$sortfield) {
@@ -248,7 +253,7 @@ $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_lead_status as cls ON p.fk_opp_statu
 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'projet_task as pt ON p.rowid = pt.fk_projet';
 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'projet_task_extrafields as ef ON pt.rowid = ef.fk_object';
 if ($versionEighteenOrMore) {
-    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_time as ptt ON (ptt.fk_element = t.rowid AND ptt.elementtype = "task")';
+    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_time as ptt ON (ptt.fk_element = pt.rowid AND ptt.elementtype = "task")';
 } else {
     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'projet_task_time as ptt ON pt.rowid = ptt.fk_task';
 }
@@ -271,6 +276,8 @@ if ($versionEighteenOrMore) {
 } else {
     $sql .= ' AND ptt.task_duration IS NOT NULL';
 }
+
+if (GETPOST('custonly')) $sql .= ' AND s.rowid IS NOT NULL';
 
 foreach ($search as $key => $val) {
 	if (preg_match('/(_dtstart|_dtend)$/', $key) && $search[$key] != '') {
@@ -375,14 +382,14 @@ $reshook = $hookmanager->executeHooks('printFieldListSearchParam', $parameters, 
 $param .= $hookmanager->resPrint;
 
 // List of mass actions available
-$arrayofmassactions = array();
-if ($permissiontodelete) {
-	$arrayofmassactions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"').$langs->trans("Delete");
-}
-if (GETPOST('nomassaction', 'int') || in_array($massaction, array('predelete'))) {
-	$arrayofmassactions = array();
-}
-//$massactionbutton = $form->selectMassAction('', $arrayofmassactions);
+// $arrayofmassactions = array();
+// if ($permissiontodelete) {
+// 	$arrayofmassactions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"').$langs->trans("Delete");
+// }
+// if (GETPOST('nomassaction', 'int') || in_array($massaction, array('predelete'))) {
+// 	$arrayofmassactions = array();
+// }
+// $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
 print '<form method="POST" id="searchFormList" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
 if ($optioncss != '') {
@@ -425,6 +432,8 @@ if (!empty($conf->categorie->enabled) && $user->rights->categorie->lire) {
 	$moreforfilter .= $formcategory->getFilterBox(Categorie::TYPE_PROJECT, $search_category_array);
 }
 
+$moreforfilter .= 'Client seulement : <input type="checkbox" name="custonly"' . (GETPOST('custonly') ? ' checked=checked' : ''). '>';
+
 if (!empty($moreforfilter)) {
 	print '<div class="liste_titre liste_titre_bydiv centpercent">';
 	print $moreforfilter;
@@ -432,8 +441,9 @@ if (!empty($moreforfilter)) {
 }
 
 $varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
+unset($arrayfields['p.rowid']);
 $selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
-$selectedfields .= (is_array($arrayofmassactions) && count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
+$selectedfields .= ((is_array($arrayofmassactions) && count($arrayofmassactions)) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="tagtable nobottomiftotal liste' . ($moreforfilter ? " listwithfilterbefore" : "") . '">' . "\n";
@@ -453,9 +463,11 @@ foreach ($arrayfields as $key => $val) {
 	} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
 		$cssforfield .= ($cssforfield ? ' ' : '').'right';
 	}
-	if (!empty($arrayfields[$key]['checked'])) {
+	if (!empty($arrayfields[$key]['checked']) && $key != 'p.rowid') {
 		print '<td class="liste_titre' . ($cssforfield ? ' ' . $cssforfield : '') . '">';
-		if (in_array($val['fieldalias'], array('socid','projectref', 'fk_user','taskid', 'invoice_id', 'timesheetid'))) {
+		if ($val['fieldalias'] == 'fk_user') {
+			print $form->select_dolusers(($search[$keysearch] > 0 ? $search[$keysearch] : -1), 'search_fk_user', 1, null, 0, '', '', 0, 0, 0, '', 0, '', 'maxwidth250');
+		} elseif (in_array($val['fieldalias'], array('socid','projectref', 'taskid', 'invoice_id', 'timesheetid'))) {
 			print $form->selectForForms($val['type'], 'search_' . $keysearch, $search[$keysearch], 1, '', '', $morecss);
 		} elseif (preg_match('/^(date|timestamp|datetime)/', $val['type'])) {
 			print '<div class="nowrap">';
@@ -497,7 +509,7 @@ foreach ($arrayfields as $key => $val) {
 										   'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
 		$cssforfield .= ($cssforfield ? ' ' : '') . 'right';
 	}
-	if (!empty($arrayfields[$key]['checked'])) {
+	if (!empty($arrayfields[$key]['checked']) && $key != 'p.rowid') {
 		print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $val['tablealias'] . $key, '', $param, ($cssforfield ? 'class="' . $cssforfield . '"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield . ' ' : '')) . "\n";
 	}
 }
@@ -568,10 +580,19 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 					print dol_print_date($obj->task_date, 'day');
 				} elseif ($key == 'title' || $key === 'label' || $key == 'note') {
 					print $obj->{$key};
-				} elseif ($key == 'task_duration') {
-					print convertSecondToTime($obj->task_duration, 'allhourmin');
+				} elseif ($key == 'task_duration' || $key == 'element_duration') {
+					if ($versionEighteenOrMore) {
+						print convertSecondToTime($obj->element_duration, 'allhourmin');
+					} else {
+						print convertSecondToTime($obj->task_duration, 'allhourmin');
+					}
+					$totalarray['type'][$i]='duration';
 				} elseif ($key == 'thm') {
-					$value = price2num($obj->thm * $obj->task_duration / 3600, 'MT', 1);
+					if ($versionEighteenOrMore) {
+						$value = price2num($obj->thm * $obj->element_duration / 3600, 'MT', 1);
+					} else {
+						$value = price2num($obj->thm * $obj->task_duration / 3600, 'MT', 1);
+					}
 					print '<span class="amount" title="'.$langs->trans("THM").': '.price($obj->thm).'">';
 					print price($value, 1, $langs, 1, -1, -1, $conf->currency);
 				}
@@ -608,15 +629,15 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 	$parameters = array('arrayfields' => $arrayfields, 'object' => $object, 'obj' => $obj, 'i' => $i, 'totalarray'  => &$totalarray);
 	$reshook = $hookmanager->executeHooks('printFieldListValue', $parameters, $object); // Note that $action and $object may have been modified by hook
 	// Action column
-	print '<td class="nowrap center">';
-	if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
-		$selected = 0;
-		if (in_array($object->id, $arrayofselected)) {
-			$selected = 1;
-		}
-		print '<input id="cb'.$object->id.'" class="flat checkforselect" type="checkbox" name="toselect[]" value="'.$object->id.'"'.($selected ? ' checked="checked"' : '').'>';
-	}
-	print '</td>';
+	// print '<td class="nowrap center">';
+	// if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+	// 	$selected = 0;
+	// 	if (in_array($object->id, $arrayofselected)) {
+	// 		$selected = 1;
+	// 	}
+	// 	print '<input id="cb'.$object->id.'" class="flat checkforselect" type="checkbox" name="toselect[]" value="'.$object->id.'"'.($selected ? ' checked="checked"' : '').'>';
+	// }
+	// print '</td>';
 	print $hookmanager->resPrint;
 	if (!$i) {
 		$totalarray['nbfield']++;
@@ -638,8 +659,8 @@ while ($i < $totalarray['nbfield']) {
         } else {
             print '<td class="left">'.$langs->trans("Totalforthispage").'</td>';
         }
-    } elseif ($totalarray['totaltask_duration'] == $i) {
-        print '<td class="left">'.convertSecondToTime($totalarray['val']['task_duration'], 'allhourmin').'</td>';
+    } elseif ($totalarray['totalelement_duration'] == $i) {
+        print '<td class="left">'.convertSecondToTime($totalarray['val']['element_duration'], 'allhourmin').'</td>';
     } elseif ($totalarray['totalthm'] == $i) {
         print '<td class="right">'.price($totalarray['val']['thm']).'</td>';
     } else {
