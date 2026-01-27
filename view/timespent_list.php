@@ -114,7 +114,7 @@ if ((float) DOL_VERSION >= 18.0) {
 }
 
 $arrayfields = array(
-	'rowid'          => array('tablealias' => 's.', 'fieldalias' => 'socid', 'type' => 'Societe:societe/class/societe.class.php:1:status=1 AND entity IN (__SHARED_ENTITIES__)', 'label' => "Customer", 'checked' => 1, 'position' => 10,  'visible' => 1),
+	'rowid'          => array('tablealias' => 's.', 'fieldalias' => 'socid', 'type' => 'Societe:societe/class/societe.class.php:1::(status:=:1) AND (entity IN (__SHARED_ENTITIES__))', 'label' => "Customer", 'checked' => 1, 'position' => 10,  'visible' => 1),
 	'ref'            => array('tablealias' => 'p.', 'fieldalias' => 'projectref', 'type' => 'Project:projet/class/project.class.php:1', 'label' => "Project", 'checked' => 1, 'position' => 20, 'visible' => 1),
 	'p.rowid'        => array('fieldalias' => 'projectid', 'type'=> 'text', 'label' => "ProjectId", 'visible' => 0),
 	'pt.rowid'       => array('fieldalias' => 'taskid', 'type' => 'Task:projet/class/task.class.php:1', 'label' => "Task", 'checked' => 1, 'position' => 30, 'visible' => 1),
